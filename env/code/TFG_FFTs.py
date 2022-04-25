@@ -1,6 +1,8 @@
 import essentia.standard as es
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
+from scipy import spatial
 
 # definimos algunos parametros globales
 sr = 48000
@@ -12,7 +14,7 @@ IR_input = es.MonoLoader(
        sampleRate=sr)()
 IR_output = es.MonoLoader(
        filename='./AUDIOS_TFG/IRs_separadas/Preguntas_2,3i4/'
-                'IR_0R_16kF_sweepstat.wav',
+                'IR_0R_16F_sweepstat.wav',
        sampleRate=sr)()
 
 IR_ref = es.MonoLoader(
@@ -98,11 +100,12 @@ T = N/sr
 freq = n/T
 
 TF_mag_out = 20*np.log10(TF_mag_out) # Magnitut en dBs
-TF_mag_ref = 20*np.log10(TF_mag_ref)
+TF_mag_ref = 20*np.log10(TF_mag_ref)-3 #Reducimos 3dBs para calculas la freq de corte
 TF_min = np.min(TF_mag_out)
 TF_max = np.max(TF_mag_out)
 
-#plt.subplot(2,1,1)
+# PLOT RESULTS
+fig, ax = plt.subplots()
 plt.semilogx(freq, TF_mag_out, color='r')
 plt.semilogx(freq, TF_mag_ref, color='b')
 plt.xlabel('Freq (Hz)')
@@ -110,6 +113,23 @@ plt.ylabel('Amplitude (dB)')
 plt.xlim(10, 32000)
 plt.ylim(TF_min,TF_max)
 plt.title('Magnitud_TF')
+red_patch = mpatches.Patch(color='red', label='TF_0R_16F_sweepstat')
+first_Leg = ax.legend(handles=[red_patch], loc='upper left')
+ax.add_artist(first_Leg)
+blue_patch = mpatches.Patch(color='blue', label='TF_Bypass_sweepstat')
+ax.legend(handles=[blue_patch], loc='upper right')
+
+'''
+Encontrar la frecuencia de corte como el punto de interseccion entre output y
+bypass, habiendo reducido la magnitud del bypass 3 dBs:
+https://stackoverflow.com/questions/28766692/intersection-of-two-graphs-in-python-find-the-x-value
+First it calculates f - g and the corresponding signs using np.sign. Applying 
+np.diff reveals all the positions, where the sign changes.
+Using np.argwhere gives us the exact indices.
+'''
+idx = np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref)))
+print('frequencia de corte:', idx[1]/10)
+plt.plot(freq[idx[1]], TF_mag_out[idx[1]], 'ko')
 plt.show()
 '''
 plt.subplot(2,1,2)
