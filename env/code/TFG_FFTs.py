@@ -14,7 +14,7 @@ IR_input = es.MonoLoader(
        sampleRate=sr)()
 IR_output = es.MonoLoader(
        filename='./AUDIOS_TFG/IRs_separadas/Preguntas_2,3i4/'
-                'IR_0R_16F_sweepstat.wav',
+                'IR_0R_256F_sweepstat.wav',
        sampleRate=sr)()
 
 IR_ref = es.MonoLoader(
@@ -22,19 +22,6 @@ IR_ref = es.MonoLoader(
                 'IR_Bypass_sweepstat.wav',
        sampleRate=sr)()
 
-# Ploteamos las IR
-'''
-fig, ax = plt.subplots(nrows=3, ncols=1)
-ax[0].plot(IR_input, color='b')
-ax[0].set_title("Input IR")
-ax[1].plot(IR_output, color='r')
-ax[1].set_title("Output IR")
-ax[2].plot(IR_ref, color='k')
-ax[2].set_title("Reference IR")
-plt.tight_layout()
-plt.show()
-exit()
-'''
 # Cogemos la posicion del max de las IR (cogiendo solo la parte positiva)
 pos_max_in = np.argmax(abs(IR_input))
 pos_max_out = np.argmax(abs(IR_output))
@@ -62,16 +49,6 @@ elif (len(IR_ref)>len(IR_output))&(len(IR_output)>len(IR_input)):
     s = len(IR_input)
 else: 
     s = len(IR_ref)
-'''
-print('pos_max_in', np.argmax(abs(IR_input)))
-print('pos_max_out', np.argmax(abs(IR_output)))
-print('pos_max_ref', np.argmax(abs(IR_ref)))
-print('len_in', len(IR_input))
-print('len_out', len(IR_output))
-print('len_ref', len(IR_ref))
-print('s', s)
-exit()
-'''
 if s%2 != 0:
     s = s-1
 
@@ -113,9 +90,12 @@ plt.ylabel('Amplitude (dB)')
 plt.xlim(10, 32000)
 plt.ylim(TF_min,TF_max)
 plt.title('Magnitud_TF')
-red_patch = mpatches.Patch(color='red', label='TF_0R_16F_sweepstat')
+red_patch = mpatches.Patch(color='red', label='TF_0R_256F_sweepstat')
 first_Leg = ax.legend(handles=[red_patch], loc='upper left')
 ax.add_artist(first_Leg)
+black_patch = mpatches.Patch(color='black', label='Frequencia de corte')
+second_Leg = ax.legend(handles=[black_patch], loc='lower left')
+ax.add_artist(second_Leg)
 blue_patch = mpatches.Patch(color='blue', label='TF_Bypass_sweepstat')
 ax.legend(handles=[blue_patch], loc='upper right')
 
@@ -128,8 +108,8 @@ np.diff reveals all the positions, where the sign changes.
 Using np.argwhere gives us the exact indices.
 '''
 idx = np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref)))
-print('frequencia de corte:', idx[1]/10)
-plt.plot(freq[idx[1]], TF_mag_out[idx[1]], 'ko')
+print('frequencia de corte:', idx[5]/10)
+plt.plot(freq[idx[5]], TF_mag_out[idx[5]], 'ko')
 plt.show()
 '''
 plt.subplot(2,1,2)
