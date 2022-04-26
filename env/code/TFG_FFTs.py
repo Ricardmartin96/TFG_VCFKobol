@@ -14,7 +14,7 @@ IR_input = es.MonoLoader(
        sampleRate=sr)()
 IR_output = es.MonoLoader(
        filename='./AUDIOS_TFG/IRs_separadas/Preguntas_2,3i4/'
-                'IR_0R_256F_sweepstat.wav',
+                'IR_0R_16kF_sweepstat.wav',
        sampleRate=sr)()
 
 IR_ref = es.MonoLoader(
@@ -87,15 +87,15 @@ plt.semilogx(freq, TF_mag_out, color='r')
 plt.semilogx(freq, TF_mag_ref, color='b')
 plt.xlabel('Freq (Hz)')
 plt.ylabel('Amplitude (dB)')
-plt.xlim(10, 32000)
+plt.xlim(10, 52000)
 plt.ylim(TF_min,TF_max)
 plt.title('Magnitud_TF')
-red_patch = mpatches.Patch(color='red', label='TF_0R_256F_sweepstat')
+red_patch = mpatches.Patch(color='red', label='TF_0R_16kF_sweepstat')
 first_Leg = ax.legend(handles=[red_patch], loc='upper left')
 ax.add_artist(first_Leg)
-black_patch = mpatches.Patch(color='black', label='Frequencia de corte')
-second_Leg = ax.legend(handles=[black_patch], loc='lower left')
-ax.add_artist(second_Leg)
+#black_patch = mpatches.Patch(color='black', label='Frequencia de corte')
+#second_Leg = ax.legend(handles=[black_patch], loc='lower left')
+#ax.add_artist(second_Leg)
 blue_patch = mpatches.Patch(color='blue', label='TF_Bypass_sweepstat')
 ax.legend(handles=[blue_patch], loc='upper right')
 
@@ -103,13 +103,17 @@ ax.legend(handles=[blue_patch], loc='upper right')
 Encontrar la frecuencia de corte como el punto de interseccion entre output y
 bypass, habiendo reducido la magnitud del bypass 3 dBs:
 https://stackoverflow.com/questions/28766692/intersection-of-two-graphs-in-python-find-the-x-value
-First it calculates f - g and the corresponding signs using np.sign. Applying 
-np.diff reveals all the positions, where the sign changes.
-Using np.argwhere gives us the exact indices.
+Primero calcula la diferencia de magnitudes y los signos correspondientes 
+usando np.sign. Aplicando np.diff las posiciones donde cambia el signo 
+(cosa que ocurre cuando ambas gráficas se cortan).
+Usar np.argwhere nos da los índices exactos.
 '''
 idx = np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref)))
-print('frequencia de corte:', idx[5]/10)
-plt.plot(freq[idx[5]], TF_mag_out[idx[5]], 'ko')
+a=24
+pendent = (TF_mag_out[idx[a]]-TF_mag_out[int(idx[a]*1.25)]) # pendent en 1/3 d'octava
+print('frequencia de corte:', idx[a]/10) # dividim per tenir la freq exacta
+print('pendent:', pendent*3, 'dBs/octava') # operem per tenir el pendent/octava
+#plt.plot(freq[idx[a]], TF_mag_out[idx[a]], 'ko')
 plt.show()
 '''
 plt.subplot(2,1,2)
