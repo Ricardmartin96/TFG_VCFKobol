@@ -88,9 +88,16 @@ T = N/sr
 freq = n/T
 
 TF_mag_out = 20*np.log10(TF_mag_out)-13 # Magnitut en dBs, restamos para compensar el gain extra
-TF_mag_ref = 20*np.log10(TF_mag_ref)+3 #Aumentamos 3dBs para calcular la res
-TF_min = np.min(TF_mag_out)
-TF_max = np.max(TF_mag_out)
+
+# Estimu el valor de pic i fc de la resonancia
+maxs = argrelextrema(TF_mag_out, np.greater)
+maxs = list(maxs)
+fc = maxs[0][580]
+pic = TF_mag_out[fc]+7-3 # resto 3 dBs (f1 i f2 son les f que estan a -3dB del pic)
+
+TF_mag_ref = 20*np.log10(TF_mag_ref)+pic #Aumentamos para calcular la res
+#TF_min = np.min(TF_mag_out)
+#TF_max = np.max(TF_mag_out)
 
 # PLOT RESULTS
 fig, ax = plt.subplots()
@@ -99,7 +106,7 @@ plt.semilogx(freq, TF_mag_ref, color='b')
 plt.xlabel('Freq (Hz)')
 plt.ylabel('Amplitude (dB)')
 plt.xlim(10, 32000)
-plt.ylim(TF_min,TF_max)
+plt.ylim(-30,pic+10)
 plt.title('Magnitud_TF')
 red_patch = mpatches.Patch(color='red', label='TF_512F_5R_sweepvar_ampmax')
 first_Leg = ax.legend(handles=[red_patch], loc='upper left')
@@ -120,8 +127,8 @@ Usar np.argwhere nos da los índices exactos.
 '''
 idx= np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref))).flatten()
 # La funcion flatten convierte un array en un integer ( de [algo] a algo)
-a=70
-b=105
+a=50
+b=70
 # pendent = (TF_mag_out[idx[a]]-TF_mag_out[int(idx[a]*4)]) # pendent
 #print('frequencia de corte:', freq[idx[a]])
 # print('pendent:', pendent/2, 'dBs/octava') # operem per tenir el pendent/octava
@@ -130,16 +137,15 @@ b=105
 f1 = idx[a]
 f2 = idx[b]
 #res = TF_mag_out[int(freq[f1]):int(freq[f2])]
-maxs = argrelextrema(TF_mag_out, np.greater)
-maxs = list(maxs)
-fc = maxs[0][600]#np.argmax(res)
-Q = fc/(freq[f2]-freq[f1])
-gain = (TF_mag_out[fc]+10)-TF_mag_out[f1]
+fres = np.sqrt(freq[f1]*freq[f2])
+Q = fres/(freq[f2]-freq[f1])
+gain = (TF_mag_out[fc]+10)-0 # El nivell rms de la sortida es 0
 
 #Printamos los parámetros de la resonancia: f1, f2, fc, Q
 print('f1:', freq[f1])
 print('f2:', freq[f2])
 print('fc:', fc)
+print('fres:', fres)
 print('Q:', Q )
 print('gain (dB)', gain)
 
