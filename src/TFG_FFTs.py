@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 from scipy import spatial
+from scipy.signal import argrelextrema
 
 # definimos algunos parametros globales
 sr = 48000
@@ -10,16 +11,16 @@ sr = 48000
 # Cargamos los audios de entrada y salida
 IR_input = es.MonoLoader(
        filename='./AUDIOS_TFG/IRs_separadas/Pregunta_1/'
-                'IR_Loopback_sweepvar_ampmin.wav',
+                'IR_Loopback_sweepvar_ampmax.wav',
        sampleRate=sr)()
 IR_output = es.MonoLoader(
        filename='./AUDIOS_TFG/IRs_separadas/Pregunta_1/'
-                'IR_4096F_0Res_sweepvar_ampmin.wav',
+                'IR_512F_5Res_sweepvar_ampmax.wav',
        sampleRate=sr)()
 
 IR_ref = es.MonoLoader(
        filename='./AUDIOS_TFG/IRs_separadas/Pregunta_1/'
-                'IR_Bypass_sweepvar_ampmin.wav',
+                'IR_Bypass_sweepvar_ampmax.wav',
        sampleRate=sr)()
 
 # Cogemos la posicion del max de las IR (cogiendo solo la parte positiva)
@@ -77,17 +78,17 @@ IR_output_fft = spec(IR_output)
 IR_ref_fft = spec(IR_ref)
 
 trans_func_out = IR_output_fft/IR_input_fft
-TF_mag_out, TF_ang_out = c2p(trans_func_out)
+TF_mag_out, TF_ang_out = c2p(trans_func_out) # TF de la salida
 trans_func_ref = IR_ref_fft/IR_input_fft
-TF_mag_ref, TF_ang_ref = c2p(trans_func_ref)
+TF_mag_ref, TF_ang_ref = c2p(trans_func_ref) # TF del bypass
 
-N = len(IR_input_fft)
+N = len(TF_mag_out)
 n = np.arange(N)
 T = N/sr
 freq = n/T
 
-TF_mag_out = 20*np.log10(TF_mag_out)-4 # Magnitut en dBs, restamos para compensar el gain extra
-TF_mag_ref = 20*np.log10(TF_mag_ref)-3 #Reducimos 3dBs para calculas la freq de corte
+TF_mag_out = 20*np.log10(TF_mag_out)-13 # Magnitut en dBs, restamos para compensar el gain extra
+TF_mag_ref = 20*np.log10(TF_mag_ref)+3 #Aumentamos 3dBs para calcular la res
 TF_min = np.min(TF_mag_out)
 TF_max = np.max(TF_mag_out)
 
@@ -97,16 +98,16 @@ plt.semilogx(freq, TF_mag_out, color='r')
 plt.semilogx(freq, TF_mag_ref, color='b')
 plt.xlabel('Freq (Hz)')
 plt.ylabel('Amplitude (dB)')
-plt.xlim(10, 42000)
+plt.xlim(10, 32000)
 plt.ylim(TF_min,TF_max)
 plt.title('Magnitud_TF')
-red_patch = mpatches.Patch(color='red', label='TF_4096F_0R_sweepvar_ampmin')
+red_patch = mpatches.Patch(color='red', label='TF_512F_5R_sweepvar_ampmax')
 first_Leg = ax.legend(handles=[red_patch], loc='upper left')
 ax.add_artist(first_Leg)
-black_patch = mpatches.Patch(color='black', label='Frequencia de corte')
+black_patch = mpatches.Patch(color='black', label='f1, fc y f2')
 second_Leg = ax.legend(handles=[black_patch], loc='lower left')
 ax.add_artist(second_Leg)
-blue_patch = mpatches.Patch(color='blue', label='TF_Bypass_sweepvar_ampmin')
+blue_patch = mpatches.Patch(color='blue', label='TF_Bypass_sweepvar_ampmax')
 ax.legend(handles=[blue_patch], loc='lower right')
 
 '''
@@ -117,14 +118,37 @@ usando np.sign. Aplicando np.diff conocemos las posiciones donde cambia el signo
 (cosa que ocurre cuando ambas gráficas se cortan).
 Usar np.argwhere nos da los índices exactos.
 '''
-idx= np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref)))
-a=114
-pendent = (TF_mag_out[idx[a]]-TF_mag_out[int(idx[a]*4)]) # pendent
-print('frequencia de corte:', freq[idx[a]]) # dividim per tenir la freq exacta
-print('pendent:', pendent/2, 'dBs/octava') # operem per tenir el pendent/octava
-plt.plot(freq[idx[a]], TF_mag_out[idx[a]], 'ko')
+idx= np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref))).flatten()
+# La funcion flatten convierte un array en un integer ( de [algo] a algo)
+a=70
+b=105
+# pendent = (TF_mag_out[idx[a]]-TF_mag_out[int(idx[a]*4)]) # pendent
+#print('frequencia de corte:', freq[idx[a]])
+# print('pendent:', pendent/2, 'dBs/octava') # operem per tenir el pendent/octava
+
+# Calculamos los parámetros de la resonancia: f1, f2, fc, Q
+f1 = idx[a]
+f2 = idx[b]
+#res = TF_mag_out[int(freq[f1]):int(freq[f2])]
+maxs = argrelextrema(TF_mag_out, np.greater)
+maxs = list(maxs)
+fc = maxs[0][600]#np.argmax(res)
+Q = fc/(freq[f2]-freq[f1])
+gain = (TF_mag_out[fc]+10)-TF_mag_out[f1]
+
+#Printamos los parámetros de la resonancia: f1, f2, fc, Q
+print('f1:', freq[f1])
+print('f2:', freq[f2])
+print('fc:', fc)
+print('Q:', Q )
+print('gain (dB)', gain)
+
+plt.plot(freq[f1], TF_mag_out[f1], 'ko')
+plt.plot(fc, TF_mag_out[fc]+10, 'ko')
+plt.plot(freq[f2], TF_mag_out[f2], 'ko')
 plt.show()
 
+'''
 #plt.subplot(2,1,2)
 plt.semilogx(freq, TF_ang_out)
 plt.xlabel('Freq (Hz)')
@@ -134,7 +158,7 @@ plt.ylim(-np.pi, np.pi)
 plt.title('Phase_TF')
 plt.tight_layout()
 plt.show()
-'''
+
 plt.subplot(2,1,1)
 plt.semilogx(freq, 20*np.log10(np.abs(IR_input_fft)))
 plt.xlabel('Freq (Hz)')
