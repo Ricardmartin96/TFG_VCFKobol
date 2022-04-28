@@ -139,7 +139,7 @@ f2 = idx[b]
 #res = TF_mag_out[int(freq[f1]):int(freq[f2])]
 fres = np.sqrt(freq[f1]*freq[f2])
 Q = fres/(freq[f2]-freq[f1])
-gain = (TF_mag_out[fc]+10)-0 # El nivell rms de la sortida es 0
+gain = (TF_mag_out[int(fres)]+10)-0 # El nivell rms de la sortida es 0
 
 #Printamos los parámetros de la resonancia: f1, f2, fc, Q
 print('f1:', freq[f1])

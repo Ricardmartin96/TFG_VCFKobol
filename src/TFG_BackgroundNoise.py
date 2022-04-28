@@ -2,26 +2,70 @@ import essentia.standard as es
 import matplotlib.pyplot as plt
 import numpy as np
 
+sr = 48000
 loader = es.MonoLoader(audioStream=0, downmix="mix", filename='./AUDIOS_TFG'
-                      '/Preg_5i6/tone_10k.wav', sampleRate=48000)
+                      '/Preg_5i6/tone_10k.wav', sampleRate=sr)
 tone = loader()
 
-
 loader = es.MonoLoader(audioStream=0, downmix="mix", filename='./AUDIOS_TFG'
-                      '/Preg_5i6/Bypass_tone10k.wav', sampleRate=48000)
+                      '/Preg_5i6/Bypass_tone10k.wav', sampleRate=sr)
 bypass = loader()
 
-w = es.Windowing(type = 'hann')
-spectrum = es.Spectrum()  # magnitude spectrum
-bypass = bypass[0:722000]
+# Nos aseguramos que ambos audios tienen el mismo tamaño y que tienen tamaño par
+if len(tone)>len(bypass):
+    s = len(bypass)
+else:
+    s = len(tone)
+if s%2 != 0:
+    s = s-1
+tone = tone[0:s]
+bypass = bypass[0:s]
 
-tone_fft = spectrum(w(tone))
-bypass_fft = spectrum(w(bypass))
-noise = bypass_fft - tone_fft
+spec = es.FFT(size=s)
+c2p = es.CartesianToPolar()
 
-plt.plot(10*np.log(np.abs(noise))) # log to plot in dB's
-plt.title('FFT Noise Tone 10kHz')
-plt.xlabel('samples') # plot gives half the total samples because of fft
-plt.ylabel('dB')
+tone_fft = spec(tone)
+tone_mag, tone_ang = c2p(tone_fft)
+bypass_fft = spec(bypass)
+bypass_mag, bypass_ang = c2p(bypass_fft)
+back_noise = 20*np.log10(tone_mag/bypass_mag)
+
+N = len(back_noise)
+n = np.arange(N)
+T = N/sr
+freq = n/T
+
+tone_mag = 20*np.log10(tone_mag)
+bypass_mag = 20*np.log10(bypass_mag)
+T_max = np.max(tone_mag)
+B_max = np.max(bypass_mag)
+N_max = np.max(back_noise)
+'''
+plt.subplot(3,1,1)
+plt.semilogx(freq, tone_mag)
+plt.xlabel('Freq (Hz)')
+plt.ylabel('Amplitude (dB)')
+plt.xlim(10, 22000)
+plt.ylim(-20,T_max)
+plt.title('Magnitud_Tone')
+
+plt.subplot(3,1,2)
+plt.semilogx(freq, bypass_mag)
+plt.xlabel('Freq (Hz)')
+plt.ylabel('Amplitude (dB)')
+plt.xlim(10, 22000)
+plt.ylim(-20,B_max)
+plt.title('Magnitud_Bypass')
+'''
+#plt.subplot(3,1,3)
+plt.semilogx(freq, back_noise)
+plt.xlabel('Freq (Hz)')
+plt.ylabel('Amplitude (dB)')
+plt.xlim(10, 22000)
+plt.ylim(-20,N_max)
+plt.title('Magnitud_Noise_10kHz')
+#plt.tight_layout()
 plt.show()
+
+
 
