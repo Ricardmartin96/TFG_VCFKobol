@@ -64,4 +64,21 @@ def transer_function (IR_input, IR_output, IR_ref):
     trans_func_ref = IR_ref_fft / IR_input_fft
     TF_mag_ref, TF_ang_ref = c2p(trans_func_ref)  # TF del bypass
 
-    return TF_mag_out, TF_mag_ref
+    # Calculamos la región plana de cada TF
+    '''
+    der = es.Derivative()
+    pos_der = np.argwhere(der(TF_mag_out)<0.5)
+    reg=0
+    for i in range(0,len(pos_der)-1):
+        dif = TF_mag_out[pos_der[i]] - TF_mag_out[pos_der[i+1]]
+        if dif<1:
+            reg = TF_mag_out[pos_der[i]]
+    '''
+    reg=[]
+    for i in range (0, len(TF_mag_out)-1):
+        if (TF_mag_out[i]-TF_mag_out[i+1])<0.1:
+            reg.append(TF_mag_out[i])
+    mean = es.Mean()
+    reg = mean(np.array(reg))
+
+    return TF_mag_out, TF_mag_ref, reg
