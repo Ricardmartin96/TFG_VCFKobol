@@ -5,30 +5,38 @@ from Funcion_Transfer import transer_function
 import json
 from pathlib import Path
 
-# p = Path("./") #AUDIOS_TFG/IRs_separated/Pregunta_1")
-p = Path('/etc')
-q = p / 'init.d' / 'reboot'
+'''
+If you’ve never used this module before or just aren’t sure which 
+class is right for your task, Path is most likely what you need. 
+It instantiates a concrete path for the platform the code is 
+running on
+'''
+data_dir = Path("./AUDIOS_TFG/IRs_separadas/Pregunta_1/")
+#print(list(data_dir.glob('**/*.py'))) # show .py files
+#print(data_dir.parts) # separa cada part del directori
+#print(data_dir.parents[0]) # show AUDIOS_TFG/IRs_separated
+#print(data_dir.parents[1]) # show AUDIOS_TFG
+#print(data_dir.stem) # show filename without .wav (PER LES FIG I JSON)
+# si el directori es la carpeta, stem dona el nom d'aquesta carpeta
+# , no dels seus arxius
+#print(Path.cwd()) # show current directory
+#print(data_dir.exists())
 
-q.is_dir()
-print(q)
+wav_files = list(data_dir.rglob("*.wav")) # store .wav files
+for child in wav_files: #data_dir.iterdir():
+    if "Loopback" in child.stem:
+        input_file = child
+        print('IR_input', input_file)
+    elif "Bypass" in child.stem:
+        reference_file = child
+        print('IR_ref', reference_file)
+    else:
+        output_file = child
+        print('IR_output', output_file)
+
+data_dir.mkdir(exist_ok=True, parent=True)
 exit()
 '''
-data_dir = "whatever/1/2"
-data_dir = Path("whatever/1/2")
-data_dir.parent
-parent.parent
-data_dir.exists()
-data_dir.mkdir(exist_ok=True, parent=True)
-data_dir.rglob()
-data_dir.rglob("*.wav")
-input_dir = Path("./AUDIOS_TFG/IRs_..../IR_Loopbak_sweep_....wav")
-
-wav_list = data_dir.rglob("*.wav")
-for wav_path in wav_list:
-if "loopback" in wav_path.stem:
-loopback_file = wav_path
-RSF KOBOL'S VCF PROJECT
-
 # definimos algunos parametros globales
 sr = 48000
 
