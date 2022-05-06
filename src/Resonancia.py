@@ -37,13 +37,13 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, IR_ref):
     plt.xlim(40, 32000)
     plt.ylim(-30,30)
     plt.title('Magnitud_TF')
-    red_patch = mpatches.Patch(color='red', label='TF_'+str(IR_output))
+    red_patch = mpatches.Patch(color='red', label='TF_'+IR_output.stem)
     first_Leg = ax.legend(handles=[red_patch], loc='upper left')
     ax.add_artist(first_Leg)
     black_patch = mpatches.Patch(color='black', label='f1, fc y f2')
     second_Leg = ax.legend(handles=[black_patch], loc='lower left')
     ax.add_artist(second_Leg)
-    blue_patch = mpatches.Patch(color='blue', label='TF_'+str(IR_ref))
+    blue_patch = mpatches.Patch(color='blue', label='TF_'+IR_ref.stem)
     ax.legend(handles=[blue_patch], loc='lower right')
 
     '''
@@ -68,7 +68,7 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, IR_ref):
     plt.plot(freq[fcentral], TF_mag_out[fcentral], 'ko')
     plt.plot(freq[f2], TF_mag_out[f2], 'ko')
 
-    plt.savefig('TF_'+str(IR_output)+'.png')
+    plt.savefig('TF_'+IR_output.stem+'.png')
 
     return freq[f1], freq[f2], freq[fcentral], fres, peak, Q, gain
 
