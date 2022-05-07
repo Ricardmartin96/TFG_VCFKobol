@@ -2,73 +2,71 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 
-def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, IR_ref):
+def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, IR_ref, output_file_res,
+                              reference_file):
 
-    # Magnitut en dBs, restamos para compensar el gain extra y tenerlas a 0dBs
-    TF_mag_out = 20*np.log10(TF_mag_out)-33
-    TF_mag_ref_0 = 20*np.log10(TF_mag_ref)-2
+    assert (len(TF_mag_out) == len(IR_output))
 
-    N = len(TF_mag_out)
-    n = np.arange(N)
-    T = N/sr
-    freq = n/T
+    for i in range(0, len(TF_mag_out)):
+        # Magnitut en dBs, restamos para compensar el gain extra y tenerlas a 0dBs
+        TF_mag_out[i][0] = 20*np.log10(TF_mag_out[i][0])-33
+        TF_mag_ref_0 = 20*np.log10(TF_mag_ref)-2
 
-    if len(TF_mag_out) < len(TF_mag_ref):
-        f = len(TF_mag_out)
-    else:
-        f = len(TF_mag_ref)
+        N = len(TF_mag_out[i][0])
+        n = np.arange(N)
+        T = N/sr
+        freq = n/T
 
-    TF_mag_out = TF_mag_out[0:f]
-    TF_mag_ref = TF_mag_ref[0:f]
+        if len(TF_mag_out[i][0]) < len(TF_mag_ref):
+            f = len(TF_mag_out[i][0])
+        else:
+            f = len(TF_mag_ref)
 
-    assert (len(TF_mag_out) == len(TF_mag_ref))
+        TF_mag_out[i][0] = TF_mag_out[i][0][0:f]
+        TF_mag_ref = TF_mag_ref[0:f]
 
-    # Recorto para encontrar fc
-    fcentral = np.argmax(TF_mag_out[40:32000])
-    peak = np.max(TF_mag_out[40:32000])
-    TF_mag_ref = TF_mag_ref_0 +peak-3 #Aumentamos para calcular la res
+        assert (len(TF_mag_out[i][0]) == len(TF_mag_ref))
 
-    # PLOT RESULTS
-    fig, ax = plt.subplots(figsize=(10,5))
-    plt.semilogx(freq, TF_mag_out, color='r')
-    plt.semilogx(freq, TF_mag_ref, color='b')
-    plt.xlabel('Freq (Hz)')
-    plt.ylabel('Amplitude (dB)')
-    plt.xlim(40, 32000)
-    plt.ylim(-30,30)
-    plt.title('Magnitud_TF')
-    red_patch = mpatches.Patch(color='red', label='TF_'+IR_output.stem)
-    first_Leg = ax.legend(handles=[red_patch], loc='upper left')
-    ax.add_artist(first_Leg)
-    black_patch = mpatches.Patch(color='black', label='f1, fc y f2')
-    second_Leg = ax.legend(handles=[black_patch], loc='lower left')
-    ax.add_artist(second_Leg)
-    blue_patch = mpatches.Patch(color='blue', label='TF_'+IR_ref.stem)
-    ax.legend(handles=[blue_patch], loc='lower right')
+        # Recorto para encontrar fc
+        fcentral = np.argmax(TF_mag_out[i][0][40:32000])
+        peak = np.max(TF_mag_out[i][0][40:32000])
+        TF_mag_ref = TF_mag_ref_0 +peak-3 #Aumentamos para calcular la res
 
-    '''
-    Encontrar f1 y f2 como los punto de interseccion entre output y bypass aumentado. 
-    Primero calcula la diferencia de magnitudes y los signos correspondientes 
-    usando np.sign. Aplicando np.diff y np.argwhere conocemos las posiciones donde
-    cambia el signo (cosa que ocurre cuando ambas gráficas se cortan).
-    '''
-    idx= np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref))).flatten()
-    # La funcion flatten convierte un array en un integer ( de [algo] a algo)
-    a=26
-    b=29
+        # PLOT RESULTS
+        fig, ax = plt.subplots(figsize=(10,5))
+        plt.semilogx(freq, TF_mag_out[i][0], color='r')
+        plt.semilogx(freq, TF_mag_ref, color='b')
+        plt.xlabel('Freq (Hz)')
+        plt.ylabel('Amplitude (dB)')
+        plt.xlim(40, 32000)
+        plt.ylim(-30,30)
+        plt.title('Magnitud_TF')
+        red_patch = mpatches.Patch(color='red', label='TF_'+output_file_res[i].stem)
+        first_Leg = ax.legend(handles=[red_patch], loc='upper left')
+        ax.add_artist(first_Leg)
+        black_patch = mpatches.Patch(color='black', label='f1, fc y f2')
+        second_Leg = ax.legend(handles=[black_patch], loc='lower left')
+        ax.add_artist(second_Leg)
+        blue_patch = mpatches.Patch(color='blue', label='TF_'+reference_file.stem)
+        ax.legend(handles=[blue_patch], loc='lower right')
 
-    # Calculamos los parámetros de la resonancia: f1, f2, fc, fres, gain y Q
-    f1 = idx[a]
-    f2 = idx[b]
-    fres = np.sqrt(freq[f1]*freq[f2])
-    Q = fres/(freq[f2]-freq[f1])
-    gain = peak - 0
+        idx= np.argwhere(np.diff(np.sign(TF_mag_out[i][0] - TF_mag_ref))).flatten()
+        # La funcion flatten convierte un array en un integer ( de [algo] a algo)
+        a=26
+        b=29
 
-    plt.plot(freq[f1], TF_mag_out[f1], 'ko')
-    plt.plot(freq[fcentral], TF_mag_out[fcentral], 'ko')
-    plt.plot(freq[f2], TF_mag_out[f2], 'ko')
+        # Calculamos los parámetros de la resonancia: f1, f2, fc, fres, gain y Q
+        f1 = idx[a]
+        f2 = idx[b]
+        fres = np.sqrt(freq[f1]*freq[f2])
+        Q = fres/(freq[f2]-freq[f1])
+        gain = peak - 0
 
-    plt.savefig('TF_'+IR_output.stem+'.png')
+        plt.plot(freq[f1], TF_mag_out[i][0][f1], 'ko')
+        plt.plot(freq[fcentral], TF_mag_out[i][0][fcentral], 'ko')
+        plt.plot(freq[f2], TF_mag_out[i][0][f2], 'ko')
+
+        plt.savefig('TF_'+output_file_res[i].stem+'.png')
 
     return freq[f1], freq[f2], freq[fcentral], fres, peak, Q, gain
 
