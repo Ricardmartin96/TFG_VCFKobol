@@ -8,15 +8,13 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
 
     assert (len(TF_mag_out) == len(IR_output))
 
+    TF_mag_ref = TF_mag_ref[40:32000]
+    TF_mag_ref = 20 * np.log10(abs(TF_mag_ref)) - reg_ref
+
     for i in range(0, len(TF_mag_out)-1):
         TF_mag_out_def = list(TF_mag_out[i][0])
-
-        # Magnitut en dBs, restamos para compensar el gain extra y tenerlas a 0dBs
         TF_mag_out_def = 20*np.log10(TF_mag_out_def) - reg_out
-        TF_mag_ref = 20*np.log10(abs(TF_mag_ref)) - reg_ref
-
-        TF_mag_out_def = TF_mag_out_def[50:32000]
-        TF_mag_ref = TF_mag_ref[50:32000]
+        TF_mag_out_def = TF_mag_out_def[40:32000]
 
         N = len(TF_mag_out_def)
         n = np.arange(N)
@@ -24,8 +22,8 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         freq = n / T
 
         # Recorto para encontrar fc
-        fcentral = np.argmax(TF_mag_out_def[50:32000])
-        peak = np.max(TF_mag_out_def[50:32000])
+        fcentral = np.argmax(TF_mag_out_def[40:32000])
+        peak = np.max(TF_mag_out_def[40:32000])
         TF_mag_ref = TF_mag_ref +peak-3 #Aumentamos para calcular la res
 
         output_file_res_name = str(output_file_res.stem).replace('IR_', '_',
@@ -64,7 +62,7 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         f2 = idx[b]
         fres = np.sqrt(freq[f1]*freq[f2])
         Q = fres/(freq[f2]-freq[f1])
-        gain = peak - TF_mag_ref[fcentral] 
+        gain = peak - TF_mag_ref[fcentral]
 
         plt.plot(freq[f1], TF_mag_out_def[f1], 'ko')
         plt.plot(freq[fcentral], TF_mag_out_def[fcentral], 'ko')

@@ -8,19 +8,13 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
 
     assert(len(TF_mag_out)==len(IR_output))
 
+    TF_mag_ref = TF_mag_ref[40:32000]
+    TF_mag_ref = 20 * np.log10(abs(TF_mag_ref)) - reg_ref - 3
+
     for i in range (0,len(TF_mag_out)-1):
         TF_mag_out_def = list(TF_mag_out[i][0])
-
-        # Magnitut en dBs, restamos para compensar el gain extra y tenerlas a 0dBs
         TF_mag_out_def = 20*np.log10(TF_mag_out_def) - reg_out
-        TF_mag_ref = 20*np.log10(abs(TF_mag_ref)) - reg_ref
-
-        # Recorto para encontrar fc
-        TF_mag_ref = TF_mag_ref - 3 #Reducimos para calcular la freq de corte
-
-        # Recortamos el señal en el área sin ruido (a ojo, mirando los plots)
-        TF_mag_out_def = TF_mag_out_def[50:32000]
-        TF_mag_ref = TF_mag_ref[50:32000]
+        TF_mag_out_def = TF_mag_out_def[40:32000]
 
         N = len(TF_mag_out_def)
         n = np.arange(N)
@@ -30,8 +24,16 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
         idx= np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).flatten()
         # La funcion flatten convierte un array en un integer ( de [algo] a algo)
         a=1
-        # pendiente en 2 octavas
-        pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*4)])/2
+        # pendiente
+        if (idx[a]<8000):
+            pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*4)])/2
+        elif (idx[a]>8000)and(idx[a]<16000):
+            pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*2)])
+        elif (idx[a]>16000)and(idx[a]<21000):
+            pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a])*1.5])
+        elif(idx[a]>21000):
+            pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a])+100])
+
         fcorte = freq[idx[a]]
 
         output_file_freq_name = str(output_file_freq.stem).replace('IR_', '_',

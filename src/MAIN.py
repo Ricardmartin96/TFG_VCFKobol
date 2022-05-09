@@ -50,19 +50,13 @@ for child in wav_files:
                                       sampleRate=sr)()
         IR_output_res_list.append(IR_output_res)
 
-
 TF_mag_out_freq, TF_mag_ref, reg_ref, reg_out = transer_function(IR_input,IR_output_freq_list,
                                                IR_ref)
 '''
 print('out: ', reg_out)
 print('ref: ', reg_ref)
-if len(TF_mag_out_freq[0][0]) < len(TF_mag_ref):
-    f = len(TF_mag_out_freq[0][0])
-else:
-    f = len(TF_mag_ref)
-
-TF_mag_out_freq_def = list(TF_mag_out_freq[0][0][0:f])
-TF_mag_ref = TF_mag_ref[0:f]
+TF_mag_out_freq_def = list(TF_mag_out_freq[0][0][50:32000])
+TF_mag_ref = TF_mag_ref[50:32000]
 N = len(TF_mag_ref)
 n = np.arange(N)
 T = N / sr
@@ -82,7 +76,7 @@ TF_mag_out_res, TF_mag_ref,  reg_ref, reg_out = transer_function(IR_input, IR_ou
 fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
                               IR_output_freq_list, output_file_freq,
                               reference_file, reg_ref, reg_out)
-exit()
+
 f1, f2, fcentral, fres, peak, Q, gain = resonance(sr, TF_mag_out_res,
                                                   TF_mag_ref, IR_output_res_list,
                                                   output_file_res, reference_file,

@@ -98,12 +98,12 @@ def transer_function (IR_input, IR_output, IR_ref):
     flat_out = []
 
     for j in range(0, len(TF_mag_ref_der) - 1):
-        if TF_mag_ref_der[j] < 0.5:
+        if (TF_mag_ref_der[j] < 0.5)and((TF_mag_ref_der[j+1]-TF_mag_ref_der[j])<0.25):
             flat_ref.append(TF_mag_ref[j])
     reg_ref = mean(np.array(flat_ref))
 
     for j in range(0, len(TF_mag_out_der) - 1):
-        if TF_mag_out_der[j] < 0.5:
+        if (TF_mag_out_der[j] < 0.5)and((TF_mag_out_der[j+1]-TF_mag_out_der[j])<0.25):
             flat_out.append(TF_mag_out[i][0][j])
     reg_out = mean(np.array(flat_out))
 
