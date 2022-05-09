@@ -2,7 +2,6 @@ import essentia.standard as es
 from Resonancia import resonance
 from Frequencia import frequency
 from Funcion_Transfer import transer_function
-import json
 from pathlib import Path
 
 data_dir = Path("./AUDIOS_TFG/IRs_separadas/Preguntas_2,3i4/")
@@ -49,6 +48,7 @@ for child in wav_files:
                                       sampleRate=sr)()
         IR_output_res_list.append(IR_output_res)
 
+
 TF_mag_out_freq, TF_mag_ref = transer_function(IR_input,IR_output_freq_list,
                                                IR_ref)
 TF_mag_out_res, TF_mag_ref = transer_function(IR_input, IR_output_res_list,
@@ -61,35 +61,6 @@ fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
 f1, f2, fcentral, fres, peak, Q, gain = resonance(sr, TF_mag_out_res,
                                                   TF_mag_ref, IR_output_res_list,
                                                   output_file_res, reference_file)
-
-# python object(dictionary) to be dumped POSAR-HO DINTRE DEL FOR DE FREQ I RES
-dict1 = {
-    "emp1": {
-        "Frecuencia de corte": str(fcorte),
-        "Pendiente": str(pendiente),
-    },
-}
-
-dict2 = {
-    "emp2": {
-        "F1": str(f1),
-        "F2": str(f2),
-        "Frecuencia central": str(fcentral),
-        "Frecuencia de resonancia": "40000",
-        "Pico": str(peak),
-        "Factor Q": str(Q),
-        "Ganancia": str(gain),
-    },
-}
-
-# the json file where the output must be stored
-freq_file = open("Results_"+output_file_freq.stem+".json", "w")
-json.dump(dict1, freq_file, indent=6)
-freq_file.close()
-
-res_file = open("Results_"+output_file_res.stem+".json", "w")
-json.dump(dict2, res_file, indent=6)
-res_file.close()
 
 '''
 output_file_freq.stem agafa el nom de l'últim arxiu que te _0R_. Per guardar 

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
+import json
 
 def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
                               reference_file):
@@ -34,6 +35,10 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         peak = np.max(TF_mag_out_def[40:32000])
         TF_mag_ref = TF_mag_ref +peak-3 #Aumentamos para calcular la res
 
+        output_file_res_name = str(output_file_res.stem).replace('IR_', '_',
+                                                                   1)
+        reference_file_name = str(reference_file.stem).replace('IR_', '_', 1)
+
         # PLOT RESULTS
         fig, ax = plt.subplots(figsize=(10,5))
         plt.semilogx(freq, TF_mag_out_def, color='r')
@@ -44,7 +49,7 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         plt.ylim(-30,30)
         plt.title('Magnitud_TF')
         red_patch = mpatches.Patch(color='red', label='TF_' +
-                                                      str(output_file_res.stem))
+                                                      str(output_file_res_name))
         first_Leg = ax.legend(handles=[red_patch], loc='upper left')
         ax.add_artist(first_Leg)
         black_patch = mpatches.Patch(color='black', label='f1,'+'fc'+'('+
@@ -53,7 +58,7 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         second_Leg = ax.legend(handles=[black_patch], loc='lower left')
         ax.add_artist(second_Leg)
         blue_patch = mpatches.Patch(color='blue', label='TF_' +
-                                                        str(reference_file.stem))
+                                                        str(reference_file_name))
         ax.legend(handles=[blue_patch], loc='lower right')
 
         idx= np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).flatten()
@@ -72,8 +77,25 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         plt.plot(freq[fcentral], TF_mag_out_def[fcentral], 'ko')
         plt.plot(freq[f2], TF_mag_out_def[f2], 'ko')
 
-        plt.savefig("TF_" + str(output_file_res.stem) + "{}.png".format(i))
+        plt.savefig("TF_" + str(output_file_res_name) + "{}.png".format(i))
         plt.close(fig)
+
+        dict2 = {
+            "emp2": {
+                "F1": str(f1),
+                "F2": str(f2),
+                "Frecuencia central": str(fcentral),
+                "Frecuencia de resonancia": "40000",
+                "Pico": str(peak),
+                "Factor Q": str(Q),
+                "Ganancia": str(gain),
+            },
+        }
+
+        res_file = open("Results_" + output_file_res_name + "{}.json".format(i),
+                        "w")
+        json.dump(dict2, res_file, indent=6)
+        res_file.close()
 
     return freq[f1], freq[f2], freq[fcentral], fres, peak, Q, gain
 
