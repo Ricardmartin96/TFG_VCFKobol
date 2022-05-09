@@ -8,6 +8,8 @@ def transer_function (IR_input, IR_output, IR_ref):
     TF_mag_out=[]
 
     c2p = es.CartesianToPolar()
+    der = es.Derivative()
+    mean = es.Mean()
 
     for i in range (0, len(IR_output)):
         # Cogemos la posicion del max de las IR (cogiendo solo la parte positiva)
@@ -77,21 +79,32 @@ def transer_function (IR_input, IR_output, IR_ref):
         trans_func_ref = IR_ref_fft / IR_input_fft
         TF_mag_ref, TF_ang_ref = c2p(trans_func_ref)  # TF del bypass
 
-        # Calculamos la región plana de cada TF
-        '''
-        der = es.Derivative()
-        pos_der = np.argwhere(der(TF_mag_out)<0.5)
-        reg=0
-        for i in range(0,len(pos_der)-1):
-            dif = TF_mag_out[pos_der[i]] - TF_mag_out[pos_der[i+1]]
-            if dif<1:
-                reg = TF_mag_out[pos_der[i]]
-        
-        reg=[]
-        for j in range (0, len(TF_mag_out[i])-1):
-            if (TF_mag_out[i]-TF_mag_out[i+1])<0.1:
-                reg.append(TF_mag_out[i])
-        mean = es.Mean()
-        reg = mean(np.array(reg))
+    # Calculamos la región plana de cada TF
     '''
-    return TF_mag_out, TF_mag_ref
+    for i in range(0,len(TF_mag_ref)-1):
+        #TF_mag_out_def = list(TF_mag_out[i][0])
+        pos_der = np.argwhere(der(TF_mag_ref)<0.5)
+        reg=[]
+        for i in range(0,len(pos_der)-1):
+            if pos_der[i]==pos_der[i+1]:
+                reg.append(TF_mag_ref[pos_der[i]])
+    op2:
+    reg_ref = np.argwhere(np.diff(TF_mag_ref)<0.5)
+    reg_ref = mean(TF_mag_ref[reg_ref])
+    '''
+    TF_mag_ref_der = der(TF_mag_ref)
+    TF_mag_out_der = der(TF_mag_out[i][0])
+    flat_ref = []
+    flat_out = []
+
+    for j in range(0, len(TF_mag_ref_der) - 1):
+        if TF_mag_ref_der[j] < 0.5:
+            flat_ref.append(TF_mag_ref[j])
+    reg_ref = mean(np.array(flat_ref))
+
+    for j in range(0, len(TF_mag_out_der) - 1):
+        if TF_mag_out_der[j] < 0.5:
+            flat_out.append(TF_mag_out[i][0][j])
+    reg_out = mean(np.array(flat_out))
+
+    return TF_mag_out, TF_mag_ref, reg_ref, reg_out

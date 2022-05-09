@@ -4,7 +4,7 @@ import numpy as np
 import json
 
 def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
-                              reference_file):
+                              reference_file, reg_ref, reg_out):
 
     assert(len(TF_mag_out)==len(IR_output))
 
@@ -12,21 +12,15 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
         TF_mag_out_def = list(TF_mag_out[i][0])
 
         # Magnitut en dBs, restamos para compensar el gain extra y tenerlas a 0dBs
-        TF_mag_out_def = 20*np.log10(TF_mag_out_def)
-        TF_mag_ref = 20*np.log10(abs(TF_mag_ref))
+        TF_mag_out_def = 20*np.log10(TF_mag_out_def) - reg_out
+        TF_mag_ref = 20*np.log10(abs(TF_mag_ref)) - reg_ref
 
         # Recorto para encontrar fc
         TF_mag_ref = TF_mag_ref - 3 #Reducimos para calcular la freq de corte
 
-        if len(TF_mag_out_def)<len(TF_mag_ref):
-            f = len(TF_mag_out_def)
-        else:
-            f = len(TF_mag_ref)
-
-        TF_mag_out_def = TF_mag_out_def[0:f]
-        TF_mag_ref = TF_mag_ref[0:f]
-
-        assert (len(TF_mag_out_def)==len(TF_mag_ref))
+        # Recortamos el señal en el área sin ruido (a ojo, mirando los plots)
+        TF_mag_out_def = TF_mag_out_def[50:32000]
+        TF_mag_ref = TF_mag_ref[50:32000]
 
         N = len(TF_mag_out_def)
         n = np.arange(N)
@@ -35,9 +29,9 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
 
         idx= np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).flatten()
         # La funcion flatten convierte un array en un integer ( de [algo] a algo)
-        a=67
-        pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]+20)])
-        # pendent
+        a=1
+        # pendiente en 2 octavas
+        pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*4)])/2
         fcorte = freq[idx[a]]
 
         output_file_freq_name = str(output_file_freq.stem).replace('IR_', '_',
@@ -69,7 +63,7 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
 
         # STORE RESULTS IN JSON FILE
         dict1 = {
-            "emp1": {
+            "Resultados: ": {
                 "Frecuencia de corte": str(fcorte),
                 "Pendiente": str(pendiente),
             },
