@@ -56,14 +56,13 @@ TF_mag_out_res, TF_mag_ref = transer_function(IR_input, IR_output_res_list,
 
 #print(TF_mag_out_freq[21][1])# 1a pos: sortida, 2a pos: magnitut o fase
 fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
-                              IR_output_freq_list, IR_ref, output_file_freq,
+                              IR_output_freq_list, output_file_freq,
                               reference_file)
 f1, f2, fcentral, fres, peak, Q, gain = resonance(sr, TF_mag_out_res,
                                                   TF_mag_ref, IR_output_res_list,
-                                                  IR_ref, output_file_res,
-                                                  reference_file)
+                                                  output_file_res, reference_file)
 
-# python object(dictionary) to be dumped
+# python object(dictionary) to be dumped POSAR-HO DINTRE DEL FOR DE FREQ I RES
 dict1 = {
     "emp1": {
         "Frecuencia de corte": str(fcorte),
@@ -84,10 +83,19 @@ dict2 = {
 }
 
 # the json file where the output must be stored
-freq_file = open("Results_"+IR_output_freq.stem+".json", "w")
+freq_file = open("Results_"+output_file_freq.stem+".json", "w")
 json.dump(dict1, freq_file, indent=6)
 freq_file.close()
 
-res_file = open("Results_"+IR_output_res.stem+".json", "w")
+res_file = open("Results_"+output_file_res.stem+".json", "w")
 json.dump(dict2, res_file, indent=6)
 res_file.close()
+
+'''
+output_file_freq.stem agafa el nom de l'últim arxiu que te _0R_. Per guardar 
+cada fig amb el seu nom corresponent, caldria fer totes les crides a funcions 
+del main dintre del for de wav_list. Pero aixo no es posible perque per cada 
+iteracio nomes hi ha un arxiu, o input, o output o referencia. Lu mateix pasa 
+amb output_file_res. I passa amb el savefig i al guardar resultats en un .json
+COM HO FAIG???
+'''

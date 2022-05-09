@@ -6,7 +6,6 @@ def transer_function (IR_input, IR_output, IR_ref):
     IR_output_fft=[]
     trans_func_out=[]
     TF_mag_out=[]
-    TF_ang_out=[]
 
     c2p = es.CartesianToPolar()
 
