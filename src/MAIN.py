@@ -50,8 +50,8 @@ for child in wav_files:
                                       sampleRate=sr)()
         IR_output_res_list.append(IR_output_res)
 
-TF_mag_out_freq, TF_mag_ref, reg_ref, reg_out = transer_function(IR_input,IR_output_freq_list,
-                                               IR_ref)
+TF_mag_out_freq, TF_mag_ref, reg_ref, reg_out = \
+    transer_function(IR_input,IR_output_freq_list, IR_ref)
 '''
 print('out: ', reg_out)
 print('ref: ', reg_ref)
@@ -69,8 +69,8 @@ plt.show()
 exit()
 '''
 
-TF_mag_out_res, TF_mag_ref,  reg_ref, reg_out = transer_function(IR_input, IR_output_res_list,
-                                              IR_ref)
+TF_mag_out_res, TF_mag_ref,  reg_ref, reg_out = \
+    transer_function(IR_input, IR_output_res_list, IR_ref)
 
 #print(TF_mag_out_freq[21][1])# 1a pos: sortida, 2a pos: magnitut o fase
 fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
@@ -78,8 +78,10 @@ fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
                               reference_file, reg_ref, reg_out)
 
 f1, f2, fcentral, fres, peak, Q, gain = resonance(sr, TF_mag_out_res,
-                                                  TF_mag_ref, IR_output_res_list,
-                                                  output_file_res, reference_file,
+                                                  TF_mag_ref,
+                                                  IR_output_res_list,
+                                                  output_file_res,
+                                                  reference_file,
                                                   reg_ref, reg_out)
 
 '''

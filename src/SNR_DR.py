@@ -29,10 +29,3 @@ print('SNR (dB): ', snr)
 print('peak (dB): ', 20*np.log10(bypass_peak))
 print('Dynamic Range (dB): ', dr)
 
-bypass[bypass == 0] = np.finfo(float).eps
-N = len(bypass)
-n = np.arange(N)
-T = N/sr
-freq = n/T
-plt.semilogx(freq, 20*np.log10(bypass))
-plt.show()

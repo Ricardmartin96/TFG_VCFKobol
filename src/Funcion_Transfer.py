@@ -3,6 +3,7 @@ import numpy as np
 
 def transer_function (IR_input, IR_output, IR_ref):
 
+    # IR_output es la lista de salidas de la carpeta
     IR_output_fft=[]
     trans_func_out=[]
     TF_mag_out=[]
@@ -12,9 +13,9 @@ def transer_function (IR_input, IR_output, IR_ref):
     mean = es.Mean()
 
     for i in range (0, len(IR_output)):
-        # Cogemos la posicion del max de las IR (cogiendo solo la parte positiva)
+    # Cogemos la posicion del max de las IR (cogiendo solo la parte positiva)
         pos_max_in = np.argmax(abs(IR_input))
-        pos_max_out = np.argmax(abs(IR_output[i])) # valor absolut i max d'un array
+        pos_max_out = np.argmax(abs(IR_output[i]))
         pos_max_ref = np.argmax(abs(IR_ref))
 
         # Recortamos los 3 señales de manera que los picos esten alineados
@@ -32,13 +33,15 @@ def transer_function (IR_input, IR_output, IR_ref):
             dif = np.argmax(abs(IR_output[i])) - pos_max_ref
             IR_output[i] = IR_output[i][dif:len(IR_output[i])]
 
-        # Para que input i output tengan el mismo tamaño y sean pares (para la FFT)
-        if ((len(IR_input) > len(IR_ref)) and (len(IR_ref) > len(IR_output[i]))) or (
-                (len(IR_ref) > len(IR_input)) and (len(IR_input) > len(IR_output[i]))):
+        # Para que input i output tengan el mismo tamaño
+        if ((len(IR_input) > len(IR_ref)) and (len(IR_ref) > len(IR_output[i])))\
+                or ((len(IR_ref) > len(IR_input))
+                    and (len(IR_input) > len(IR_output[i]))):
             s = len(IR_output[i])
-        elif ((len(IR_ref) > len(IR_output[i])) and (
-                len(IR_output[i]) > len(IR_input))) or (
-                (len(IR_output[i]) > len(IR_ref)) and (len(IR_ref) > len(IR_input))):
+        elif ((len(IR_ref) > len(IR_output[i]))
+              and (len(IR_output[i]) > len(IR_input))) \
+                or ((len(IR_output[i]) > len(IR_ref))
+                    and (len(IR_ref) > len(IR_input))):
             s = len(IR_input)
         elif (len(IR_input)==len(IR_ref))and(len(IR_input)<len(IR_output[i])):
             s = len(IR_input)
@@ -53,18 +56,12 @@ def transer_function (IR_input, IR_output, IR_ref):
         IR_output[i] = IR_output[i][0:s]
         IR_ref = IR_ref[0:s]
 
-        # Comprovamos que las IR están alienadas y tienen el mismo tamaño
-        assert (len(IR_input) == len(IR_output[i]))
-        assert (len(IR_input) == len(IR_ref))
-        assert (np.argmax(abs(IR_input)) == np.argmax(abs(IR_output[i])))
-        assert (np.argmax(abs(IR_input)) == np.argmax(abs(IR_ref)))
-
-        # Si es 0, lo ponemos a un valor muy pequeño, para evitar inf i nan en la TF
+        # Si es 0, lo ponemos a un valor muy pequeño
         IR_input[IR_input == 0] = np.finfo(float).eps  # 0 = num molt petit
         IR_output[i][IR_output[i] == 0] = np.finfo(float).eps
         IR_ref[IR_ref == 0] = np.finfo(float).eps
 
-        # Calculamos fft de in, out y ref y calculamos la funcion de transferencia(TF)
+        # Calculamos fft y funcion de transferencia(TF)
         spec = es.FFT(size=s)
 
         IR_input_fft = spec(IR_input)

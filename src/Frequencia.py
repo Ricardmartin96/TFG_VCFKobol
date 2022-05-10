@@ -21,12 +21,14 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
         T = N / sr
         freq = n / T
 
-        idx= np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).flatten()
-        # La funcion flatten convierte un array en un integer ( de [algo] a algo)
+        idx= np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).\
+            flatten()
+    # La funcion flatten convierte un array en un integer ( de [algo] a algo)
         a=1
         # pendiente
         if (idx[a]<8000):
-            pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*4)])/2
+            pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*4)])\
+                        /2
         elif (idx[a]>8000)and(idx[a]<16000):
             pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*2)])
         elif (idx[a]>16000)and(idx[a]<21000):
@@ -53,10 +55,12 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
                                                       str(output_file_freq_name))
         first_Leg = ax.legend(handles=[red_patch], loc='upper left')
         ax.add_artist(first_Leg)
-        black_patch = mpatches.Patch(color='black', label='f_corte:'+ str(fcorte))
+        black_patch = mpatches.Patch(color='black', label='f_corte:'+
+                                                          str(fcorte))
         second_Leg = ax.legend(handles=[black_patch], loc='lower left')
         ax.add_artist(second_Leg)
-        blue_patch = mpatches.Patch(color='blue', label='TF_'+str(reference_file_name))
+        blue_patch = mpatches.Patch(color='blue', label='TF_'+
+                                                        str(reference_file_name))
         ax.legend(handles=[blue_patch], loc='lower right')
         plt.plot(freq[idx[a]], TF_mag_out_def[idx[a]], 'ko')
 
@@ -71,7 +75,8 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
             },
         }
 
-        freq_file = open("Results_" + output_file_freq_name + "{}.json".format(i), "w")
+        freq_file = open("Results_" + output_file_freq_name + "{}.json".
+                         format(i), "w")
         json.dump(dict1, freq_file, indent=6)
         freq_file.close()
 
