@@ -26,9 +26,9 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         T = N / sr
         freq = n / T
 
-        # Recorto para encontrar fc
-        fcentral = np.argmax(TF_mag_out_def[40:32000])
-        peak = np.max(TF_mag_out_def[40:32000])
+        # Encontramos fcentral y su pico
+        fcentral = np.argmax(TF_mag_out_def)
+        peak = np.max(TF_mag_out_def)
 
         # Aumentamos el bypass para calcular f1 y f2
         TF_mag_ref = TF_mag_ref +peak - 3
