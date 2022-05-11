@@ -6,26 +6,30 @@ import json
 def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
                               reference_file, reg_ref, reg_out):
 
-    assert(len(TF_mag_out)==len(IR_output))
-
+    # Recortamos el bypass para tener la region sin ruido
     TF_mag_ref = TF_mag_ref[40:32000]
+
+    # Reducimos el nivel para que tenerla a 0dBs y -3 para calcular la fcorte
     TF_mag_ref = 20 * np.log10(abs(TF_mag_ref)) - reg_ref - 3
 
+    # Iteramos sobre las salidas
     for i in range (0,len(TF_mag_out)-1):
+
+        # Cogemos la magnitud de la salida i, la reducimos y la recortamos
         TF_mag_out_def = list(TF_mag_out[i][0])
         TF_mag_out_def = 20*np.log10(TF_mag_out_def) - reg_out
         TF_mag_out_def = TF_mag_out_def[40:32000]
 
+        # Calculamos el eje x (pasamos de muestras a frecuencia)
         N = len(TF_mag_out_def)
         n = np.arange(N)
         T = N / sr
         freq = n / T
 
+        # Calculamos la fc y el pendiente
         idx= np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).\
-            flatten()
-    # La funcion flatten convierte un array en un integer ( de [algo] a algo)
+            flatten() # flatten convierte un array en un integer
         a=1
-        # pendiente
         if (idx[a]<8000):
             pendiente = (TF_mag_out_def[idx[a]]-TF_mag_out_def[int(idx[a]*4)])\
                         /2
@@ -38,11 +42,12 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
 
         fcorte = freq[idx[a]]
 
+        # Eliminamos la IR_ del nombre
         output_file_freq_name = str(output_file_freq.stem).replace('IR_', '_',
                                                                    1)
         reference_file_name = str(reference_file.stem).replace('IR_', '_', 1)
 
-        # PLOT RESULTS
+        # Ploteamos y guardamos los resultados
         fig, ax = plt.subplots(figsize=(10, 4))
         plt.semilogx(freq, TF_mag_out_def, color='r')
         plt.semilogx(freq, TF_mag_ref, color='b')
@@ -67,7 +72,6 @@ def frequency(sr, TF_mag_out, TF_mag_ref, IR_output, output_file_freq,
         plt.savefig("TF_"+ str(output_file_freq_name)+"{}.png".format(i))
         plt.close(fig)
 
-        # STORE RESULTS IN JSON FILE
         dict1 = {
             "Resultados: ": {
                 "Frecuencia de corte": str(fcorte),

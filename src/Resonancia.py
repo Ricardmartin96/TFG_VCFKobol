@@ -6,16 +6,21 @@ import json
 def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
                               reference_file, reg_ref, reg_out):
 
-    assert (len(TF_mag_out) == len(IR_output))
-
+    # Recortamos el bypass para tener la region sin ruido
     TF_mag_ref = TF_mag_ref[40:32000]
+
+    # Reducimos el nivel para que tenerla a 0dBs
     TF_mag_ref = 20 * np.log10(abs(TF_mag_ref)) - reg_ref
 
+    # Iteramos sobre las salidas
     for i in range(0, len(TF_mag_out)-1):
+
+        # Cogemos la magnitud de la salida i, la reducimos y la recortamos
         TF_mag_out_def = list(TF_mag_out[i][0])
         TF_mag_out_def = 20*np.log10(TF_mag_out_def) - reg_out
         TF_mag_out_def = TF_mag_out_def[40:32000]
 
+        # Calculamos el eje x (pasamos de muestras a frecuencia)
         N = len(TF_mag_out_def)
         n = np.arange(N)
         T = N / sr
@@ -24,13 +29,27 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         # Recorto para encontrar fc
         fcentral = np.argmax(TF_mag_out_def[40:32000])
         peak = np.max(TF_mag_out_def[40:32000])
-        TF_mag_ref = TF_mag_ref +peak-3 #Aumentamos para calcular la res
 
+        # Aumentamos el bypass para calcular f1 y f2
+        TF_mag_ref = TF_mag_ref +peak - 3
+
+        # Calculamos los parametros de la resonancia
+        idx = np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).\
+            flatten()
+        a = 1
+        b = 2
+        f1 = idx[a]
+        f2 = idx[b]
+        fres = np.sqrt(freq[f1] * freq[f2])
+        Q = fres / (freq[f2] - freq[f1])
+        gain = peak - TF_mag_ref[fcentral]
+
+        # Eliminamos la IR_ del nombre
         output_file_res_name = str(output_file_res.stem).replace('IR_', '_',
                                                                    1)
         reference_file_name = str(reference_file.stem).replace('IR_', '_', 1)
 
-        # PLOT RESULTS
+        # Ploteamos y guardamos resultados
         fig, ax = plt.subplots(figsize=(10,5))
         plt.semilogx(freq, TF_mag_out_def, color='r')
         plt.semilogx(freq, TF_mag_ref, color='b')
@@ -51,19 +70,6 @@ def resonance (sr, TF_mag_out, TF_mag_ref, IR_output, output_file_res,
         blue_patch = mpatches.Patch(color='blue', label='TF_' +
                                                         str(reference_file_name))
         ax.legend(handles=[blue_patch], loc='lower right')
-
-        idx= np.argwhere(np.diff(np.sign(TF_mag_out_def - TF_mag_ref))).flatten()
-        # La funcion flatten convierte un array en un integer ( de [algo] a algo)
-        a = 1
-        b = 2
-
-        # Calculamos los parámetros de la resonancia: f1, f2, fc, fres, gain y Q
-        f1 = idx[a]
-        f2 = idx[b]
-        fres = np.sqrt(freq[f1]*freq[f2])
-        Q = fres/(freq[f2]-freq[f1])
-        gain = peak - TF_mag_ref[fcentral]
-
         plt.plot(freq[f1], TF_mag_out_def[f1], 'ko')
         plt.plot(freq[fcentral], TF_mag_out_def[fcentral], 'ko')
         plt.plot(freq[f2], TF_mag_out_def[f2], 'ko')

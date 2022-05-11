@@ -6,12 +6,14 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+# definimos un parametro global
+sr = 48000
+
+# Definimos un directorio y la lista de arxivos que contiene
 data_dir = Path("./AUDIOS_TFG/IRs_separadas/Preguntas_2,3i4/")
 wav_files = list(data_dir.rglob("*.wav"))
 
-# definimos algunos parametros globales
-sr = 48000
-
+# Declaramos ciertas variables para poder reusarlas fuera de los ifs
 IR_input = None
 IR_output_freq = None
 IR_output_res = None
@@ -22,6 +24,8 @@ output_file_res = None
 
 IR_output_freq_list = []
 IR_output_res_list = []
+
+# Iteramos sobre los archivos del directorio y los clasificamos
 for child in wav_files:
     if "Loopback" in child.stem:
         input_file = child
@@ -50,13 +54,14 @@ for child in wav_files:
                                       sampleRate=sr)()
         IR_output_res_list.append(IR_output_res)
 
+# Calculamos las TF y comprovamos que estan a 0dBs
 TF_mag_out_freq, TF_mag_ref, reg_ref, reg_out = \
     transer_function(IR_input,IR_output_freq_list, IR_ref)
 '''
 print('out: ', reg_out)
 print('ref: ', reg_ref)
-TF_mag_out_freq_def = list(TF_mag_out_freq[0][0][50:32000])
-TF_mag_ref = TF_mag_ref[50:32000]
+TF_mag_out_freq_def = list(TF_mag_out_freq[0][0][40:32000])
+TF_mag_ref = TF_mag_ref[40:32000]
 N = len(TF_mag_ref)
 n = np.arange(N)
 T = N / sr
@@ -72,7 +77,7 @@ exit()
 TF_mag_out_res, TF_mag_ref,  reg_ref, reg_out = \
     transer_function(IR_input, IR_output_res_list, IR_ref)
 
-#print(TF_mag_out_freq[21][1])# 1a pos: sortida, 2a pos: magnitut o fase
+# Calculamos parametros de frecuencia y resonancia
 fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
                               IR_output_freq_list, output_file_freq,
                               reference_file, reg_ref, reg_out)
@@ -84,11 +89,3 @@ f1, f2, fcentral, fres, peak, Q, gain = resonance(sr, TF_mag_out_res,
                                                   reference_file,
                                                   reg_ref, reg_out)
 
-'''
-output_file_freq.stem agafa el nom de l'últim arxiu que te _0R_. Per guardar 
-cada fig amb el seu nom corresponent, caldria fer totes les crides a funcions 
-del main dintre del for de wav_list. Pero aixo no es posible perque per cada 
-iteracio nomes hi ha un arxiu, o input, o output o referencia. Lu mateix pasa 
-amb output_file_res. I passa amb el savefig i al guardar resultats en un .json
-COM HO FAIG???
-'''

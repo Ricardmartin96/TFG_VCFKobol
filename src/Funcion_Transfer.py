@@ -3,7 +3,6 @@ import numpy as np
 
 def transer_function (IR_input, IR_output, IR_ref):
 
-    # IR_output es la lista de salidas de la carpeta
     IR_output_fft=[]
     trans_func_out=[]
     TF_mag_out=[]
@@ -12,13 +11,14 @@ def transer_function (IR_input, IR_output, IR_ref):
     der = es.Derivative()
     mean = es.Mean()
 
+    # Iteramos sobre las salidas
     for i in range (0, len(IR_output)):
-    # Cogemos la posicion del max de las IR (cogiendo solo la parte positiva)
+
+        # Alineamos las IRs
         pos_max_in = np.argmax(abs(IR_input))
         pos_max_out = np.argmax(abs(IR_output[i]))
         pos_max_ref = np.argmax(abs(IR_ref))
 
-        # Recortamos los 3 señales de manera que los picos esten alineados
         if pos_max_out > pos_max_in:
             dif1 = pos_max_out - pos_max_in
             IR_output[i] = IR_output[i][dif1:len(IR_output[i])]
@@ -33,7 +33,7 @@ def transer_function (IR_input, IR_output, IR_ref):
             dif = np.argmax(abs(IR_output[i])) - pos_max_ref
             IR_output[i] = IR_output[i][dif:len(IR_output[i])]
 
-        # Para que input i output tengan el mismo tamaño
+        # Nos aseguramos que tengan la misma longitud y que esta sea par
         if ((len(IR_input) > len(IR_ref)) and (len(IR_ref) > len(IR_output[i])))\
                 or ((len(IR_ref) > len(IR_input))
                     and (len(IR_input) > len(IR_output[i]))):
@@ -56,12 +56,12 @@ def transer_function (IR_input, IR_output, IR_ref):
         IR_output[i] = IR_output[i][0:s]
         IR_ref = IR_ref[0:s]
 
-        # Si es 0, lo ponemos a un valor muy pequeño
-        IR_input[IR_input == 0] = np.finfo(float).eps  # 0 = num molt petit
+        # Si es 0, lo ponemos a un valor muy proximo a 0
+        IR_input[IR_input == 0] = np.finfo(float).eps
         IR_output[i][IR_output[i] == 0] = np.finfo(float).eps
         IR_ref[IR_ref == 0] = np.finfo(float).eps
 
-        # Calculamos fft y funcion de transferencia(TF)
+        # Calculamos fft y funcion de transferencia(TF) de salida y bypass
         spec = es.FFT(size=s)
 
         IR_input_fft = spec(IR_input)
@@ -71,12 +71,12 @@ def transer_function (IR_input, IR_output, IR_ref):
         trans_func_out.append(IR_output_fft[i] / IR_input_fft)
 
         TF_mag_out.append(c2p(trans_func_out[i])) # TF de la salida
-        # retorna una tupla: 1a pos: sortida, 2a pos: magnitut o fase
+        # devuelve una tupla (1a pos: salida, 2a pos: magnitud o fase)
 
         trans_func_ref = IR_ref_fft / IR_input_fft
         TF_mag_ref, TF_ang_ref = c2p(trans_func_ref)  # TF del bypass
 
-    # Calculamos la región plana de cada TF
+    # Calculamos el nivel de la region plana de cada TF
     '''
     for i in range(0,len(TF_mag_ref)-1):
         #TF_mag_out_def = list(TF_mag_out[i][0])
@@ -95,12 +95,14 @@ def transer_function (IR_input, IR_output, IR_ref):
     flat_out = []
 
     for j in range(0, len(TF_mag_ref_der) - 1):
-        if (TF_mag_ref_der[j] < 0.5)and((TF_mag_ref_der[j+1]-TF_mag_ref_der[j])<0.25):
+        if (TF_mag_ref_der[j] < 0.5)and((TF_mag_ref_der[j+1]-TF_mag_ref_der[j])
+                                        <0.25):
             flat_ref.append(TF_mag_ref[j])
     reg_ref = mean(np.array(flat_ref))
 
     for j in range(0, len(TF_mag_out_der) - 1):
-        if (TF_mag_out_der[j] < 0.5)and((TF_mag_out_der[j+1]-TF_mag_out_der[j])<0.25):
+        if (TF_mag_out_der[j] < 0.5)and((TF_mag_out_der[j+1]-TF_mag_out_der[j])
+                                        <0.25):
             flat_out.append(TF_mag_out[i][0][j])
     reg_out = mean(np.array(flat_out))
 

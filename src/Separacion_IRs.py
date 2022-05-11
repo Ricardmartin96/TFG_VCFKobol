@@ -1,16 +1,16 @@
 import essentia.standard as es
 
-# Cargamos el audio necesario
+# Importamos audio
 loader = es.MonoLoader(audioStream=0, downmix="mix", filename='./AUDIOS_TFG' 
                 '/IRs/Preguntes_2,3i4/IR_allF_0R_sweepstat.wav', sampleRate=48000)
 IR_audio = loader()
 
-# Detección de picos
+# Detectamos la posicion y amplitud de los picos (IRs)
 peaks = es.PeakDetection(maxPeaks=11, minPeakDistance=0.064,
                          threshold=0.0002)
 peaks_pos, peaks_amp = peaks(IR_audio)
 
-# pasamos a muestras (PeakDetection devuelve posiciones de 0 a 1)
+# Pasamos a muestras (PeakDetection devuelve posiciones de 0 a 1)
 peaks_pos = peaks_pos*len(IR_audio)
 
 # Definimos T como el intervalo entre dos IR (dos picos)
