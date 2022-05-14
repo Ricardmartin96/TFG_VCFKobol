@@ -1,7 +1,7 @@
 import essentia.standard as es
 from Resonancia import resonance
 from Frequencia import frequency
-from Funcion_Transfer import transer_function
+from Transfer_Function import transfer_function
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,6 +24,8 @@ output_file_res = None
 
 IR_output_freq_list = []
 IR_output_res_list = []
+output_file_freq_names = []
+output_file_res_names = []
 
 # Iteramos sobre los archivos del directorio y los clasificamos
 for child in wav_files:
@@ -45,6 +47,7 @@ for child in wav_files:
                                                 'Preguntas_2,3i4/' +
                                                 str(output_file_freq.name),
                                        sampleRate=sr)()
+        output_file_freq_names.append(output_file_freq.stem)
         IR_output_freq_list.append(IR_output_freq)
     else:
         output_file_res = child
@@ -52,40 +55,28 @@ for child in wav_files:
                                                 'Preguntas_2,3i4/' +
                                                 str(output_file_res.name),
                                       sampleRate=sr)()
+        output_file_res_names.append(output_file_res.stem)
         IR_output_res_list.append(IR_output_res)
 
-# Calculamos las TF y comprovamos que estan a 0dBs
-TF_mag_out_freq, TF_mag_ref, reg_ref, reg_out = \
-    transer_function(IR_input,IR_output_freq_list, IR_ref)
-'''
-print('out: ', reg_out)
-print('ref: ', reg_ref)
-TF_mag_out_freq_def = list(TF_mag_out_freq[0][0][40:32000])
-TF_mag_ref = TF_mag_ref[40:32000]
-N = len(TF_mag_ref)
-n = np.arange(N)
-T = N / sr
-freq = n / T
-plt.semilogx(freq, TF_mag_ref - reg_ref)
-plt.semilogx(freq, np.array(TF_mag_out_freq_def) - reg_out)
-plt.xlim(10, 42000)
-plt.ylim(-30, 30)
-plt.show()
-exit()
-'''
+# CALCULAR TF DEL BYPASS
+TF_mag_ref, TF_ang_ref = transfer_function(IR_ref, IR_input)
 
-TF_mag_out_res, TF_mag_ref,  reg_ref, reg_out = \
-    transer_function(IR_input, IR_output_res_list, IR_ref)
+# CALCULAR TF DE SALIDAS CON RES = 0
+for i in range(0,len(IR_output_freq_list)-1):
+    TF_mag_out_freq, TF_ang_out_freq = transfer_function(
+        IR_input, IR_output_freq_list[i])
 
-# Calculamos parametros de frecuencia y resonancia
-fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
-                              IR_output_freq_list, output_file_freq,
-                              reference_file, reg_ref, reg_out)
+    fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
+                                  output_file_freq_names[i],
+                                  reference_file.name)
 
-f1, f2, fcentral, fres, peak, Q, gain = resonance(sr, TF_mag_out_res,
-                                                  TF_mag_ref,
-                                                  IR_output_res_list,
-                                                  output_file_res,
-                                                  reference_file,
-                                                  reg_ref, reg_out)
 
+# CALCULAR TF DE SALIDAS CON RES != 0
+for i in range(0,len(IR_output_res_list)-1):
+    TF_mag_out_res, TF_ang_out_res = transfer_function(
+        IR_input, IR_output_res_list[i])
+
+    f1, f2, fcentral, fres, peak, Q, gain = resonance(sr, TF_mag_out_res,
+                                                      TF_mag_ref,
+                                                      output_file_res_names[i],
+                                                      reference_file.name)

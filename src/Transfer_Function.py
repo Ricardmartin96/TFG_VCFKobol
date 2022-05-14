@@ -1,7 +1,7 @@
 import essentia.standard as es
 import numpy as np
 
-def transfer_function (IR_input, IR_output, sr):
+def transfer_function (IR_input, IR_output):
     c2p = es.CartesianToPolar()
 
     # Alineamos las IRs
