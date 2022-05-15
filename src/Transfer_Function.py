@@ -40,6 +40,7 @@ def transfer_function (IR_input, IR_output):
     trans_func = IR_output_fft / IR_input_fft
     TF_mag, TF_ang = c2p(trans_func)
     TF_mag = 20*np.log10(TF_mag)
+    TF_mag = TF_mag - TF_mag[430]
 
     return TF_mag, TF_ang
 

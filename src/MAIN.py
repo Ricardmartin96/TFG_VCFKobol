@@ -69,7 +69,7 @@ for i in range(0,len(IR_output_freq_list)-1):
     fcorte, pendiente = frequency(sr, TF_mag_out_freq, TF_mag_ref,
                                   output_file_freq_names[i],
                                   reference_file.name)
-
+exit()
 
 # CALCULAR TF DE SALIDAS CON RES != 0
 for i in range(0,len(IR_output_res_list)-1):
