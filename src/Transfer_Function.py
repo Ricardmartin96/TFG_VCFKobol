@@ -2,6 +2,7 @@ import essentia.standard as es
 import numpy as np
 
 def transfer_function (IR_input, IR_output):
+
     c2p = es.CartesianToPolar()
 
     # Alineamos las IRs
@@ -16,7 +17,7 @@ def transfer_function (IR_input, IR_output):
         IR_input = IR_input[dif1:len(IR_input)]
 
     # Nos aseguramos que tengan la misma longitud y que esta sea par
-    if (len(IR_input) < len(IR_output)):
+    if len(IR_input) < len(IR_output):
         s = len(IR_input)
     else:
         s = len(IR_output)
@@ -40,7 +41,14 @@ def transfer_function (IR_input, IR_output):
     trans_func = IR_output_fft / IR_input_fft
     TF_mag, TF_ang = c2p(trans_func)
     TF_mag = 20*np.log10(TF_mag)
-    TF_mag = TF_mag - TF_mag[430]
+
+    # Recortamos la TF para tener la region sin ruido
+    # (esta va desde los 40Hz hasta los 40kHz)
+    if len(TF_mag)<320000:
+        TF_mag = np.concatenate([TF_mag, np.zeros(320000-len(TF_mag))])
+
+    TF_mag = TF_mag[400:320000]
+
 
     return TF_mag, TF_ang
 
