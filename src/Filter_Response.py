@@ -19,7 +19,7 @@ def logFunc(x, a, b):
 def linFunc(x, a, b):
     return a*x + b
 
-# Definimos la ecuacion de la curva exponencial
+# Definimos la ecuacion de la curva exponencial negativa
 def expFunc(x, a, t, b):
     return a * np.exp(-t * x) + b
 

@@ -12,14 +12,12 @@ def frequency(sr, TF_mag_out, TF_mag_ref, output_file_freq, reference_file):
     fcorte = np.argwhere(np.diff(np.sign(TF_mag_out - TF_mag_ref))).flatten()
     fcorte = fcorte[0]
 
-    if (fcorte < 8000):
-        pendiente = (TF_mag_out[fcorte]-TF_mag_out[int(fcorte*4)])/2
-    elif (fcorte>8000)and(fcorte<16000):
-        pendiente = (TF_mag_out[fcorte]-TF_mag_out[int(fcorte*2)])
-    elif (fcorte>16000)and(fcorte<21000):
-        pendiente = (TF_mag_out[fcorte]-TF_mag_out[int(fcorte*1.5)])
-    elif(fcorte>21000):
-        pendiente = (TF_mag_out[fcorte]-TF_mag_out[int(fcorte)+100])
+    if fcorte < 80000:
+        pendiente = (TF_mag_out[int(fcorte)]-TF_mag_out[int(fcorte*4)])/2
+    elif (fcorte>80000)and(fcorte<210000):
+        pendiente = (TF_mag_out[int(fcorte)]-TF_mag_out[int(fcorte*2)])
+    elif fcorte>210000:
+        pendiente = (TF_mag_out[int(fcorte)]-TF_mag_out[int(fcorte)+6000])
 
     # Eliminamos la IR_ del nombre
     output_file_freq_name = str(output_file_freq).replace('IR_', '_', 1)
@@ -36,7 +34,7 @@ def frequency(sr, TF_mag_out, TF_mag_ref, output_file_freq, reference_file):
     plt.semilogx(freq, TF_mag_ref, color='b')
     plt.xlabel('Freq (Hz)')
     plt.ylabel('Amplitude (dB)')
-    plt.xlim(10, 32000)
+    plt.xlim(10, 52000)
     plt.ylim(-30,30)
     plt.title('Magnitud_TF')
     red_patch = mpatches.Patch(color='red', label='TF' +
@@ -51,14 +49,14 @@ def frequency(sr, TF_mag_out, TF_mag_ref, output_file_freq, reference_file):
                                                     str(reference_file_name))
     ax.legend(handles=[blue_patch], loc='lower right')
     plt.plot(freq[fcorte], TF_mag_out[fcorte], 'ko')
-
+    
     plt.savefig("TF"+str(output_file_freq_name)+".png".format())
     plt.close(fig)
-
+    
     dict1 = {
         "Resultados: ": {
-            "Frecuencia de corte": str(freq[fcorte]),
-            "Pendiente": str(pendiente),
+            "Frecuencia de corte": str(freq[fcorte]) + 'Hz',
+            "Pendiente": str(pendiente) + 'dB/octava',
         }
     }
 

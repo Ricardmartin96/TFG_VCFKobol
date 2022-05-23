@@ -1,4 +1,5 @@
 import essentia.standard as es
+import matplotlib.pyplot as plt
 
 # Importamos audio
 loader = es.MonoLoader(audioStream=0, downmix="mix", filename='./AUDIOS_TFG' 
@@ -13,15 +14,15 @@ peaks_pos, peaks_amp = peaks(IR_audio)
 # Pasamos a muestras (PeakDetection devuelve posiciones de 0 a 1)
 peaks_pos = peaks_pos*len(IR_audio)
 
-# Definimos T como el intervalo entre dos IR (dos picos)
+# Definimos T como el intervalo entre dos IR
 T = peaks_pos[2] - peaks_pos[1]
 
 # Cogemos solo la IR que nos interesa
-IR_sep = IR_audio[int(peaks_pos[10] - (T/2)): int(peaks_pos[10] + (T/2))]
+IR_sep = IR_audio[int(peaks_pos[5] - (T/2)): int(peaks_pos[5] + (T/2))]
 
 # Guardamos el nuevo archivo
 file = es.MonoWriter(filename='./AUDIOS_TFG/IRs_separadas/Preguntas_2,3i4/'
-                              'IR_0R_16F_sweepstat.wav', format='wav',
+                              'IR_16F_0R_sweepstat.wav', format='wav',
                      sampleRate=48000)
 file(IR_sep)
 

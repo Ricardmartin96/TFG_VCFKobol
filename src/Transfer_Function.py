@@ -44,11 +44,7 @@ def transfer_function (IR_input, IR_output):
 
     # Recortamos la TF para tener la region sin ruido
     # (esta va desde los 40Hz hasta los 40kHz)
-    if len(TF_mag)<320000:
-        TF_mag = np.concatenate([TF_mag, np.zeros(320000-len(TF_mag))])
-
     TF_mag = TF_mag[400:320000]
-
 
     return TF_mag, TF_ang
 
