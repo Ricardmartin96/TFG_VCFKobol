@@ -65,6 +65,7 @@ TF_mag_ref, TF_ang_ref = transfer_function(IR_input, IR_ref)
 # Reducimos el nivel de la region plana para compensar la ganancia extra
 TF_mag_ref = TF_mag_ref - mean(TF_mag_ref[500:2000])
 
+'''
 # CALCULAR TF DE SALIDAS CON RES = 0 y PARAMETROS DE FRECUENCIA
 fcorte_lista=[]
 for i in range(0,len(IR_output_freq_list)-1):
@@ -80,6 +81,7 @@ for i in range(0,len(IR_output_freq_list)-1):
 
     fcorte_lista.append(fcorte)
 
+# PLoteamos todas las frecuencias de corte
 fcorte_lista = np.asarray(fcorte_lista)
 fcorte_lista = np.sort(fcorte_lista, axis=None)
 labels=['16F', '32F', '64F', '128F', '256F', '512F', '1024F', '2048F', '4096F']
@@ -88,20 +90,38 @@ for i in range(0,len(fcorte_lista)):
     plt.plot(labels[i],  fcorte_lista[i], 'ko')
 
 plt.plot(labels,  fcorte_lista, color='r')
-plt.xlabel('Frecuencias de corte teoricas (Hz)')
-plt.ylabel('Frecuencias de corte reales (Hz)')
-plt.savefig("Frecuencias_de_corte" + ".png".format())
-
+plt.xlabel('Posiciones del potenciometro de Frecuencia')
+plt.ylabel('Frecuencias de corte (Hz)')
+plt.savefig("Frecuencias_de_corte_sweepstat" + ".png".format())
 '''
+
 # CALCULAR TF DE SALIDAS CON RES != 0 Y PARAMETROS DE RESONANCIA
+peak_list=[]
 for i in range(0,len(IR_output_res_list)-1):
     TF_mag_out_res, TF_ang_out_res = transfer_function(
         IR_input, IR_output_res_list[i])
 
     TF_mag_out_res = TF_mag_out_res - mean(TF_mag_out_res[40:90])
-
+    '''
     f1, f2, fcentral, fres, peak, Q = resonance(sr, TF_mag_out_res,
                                                       TF_mag_ref,
                                                       output_file_res_names[i],
                                                       reference_file.name)
-'''
+    '''
+    peak = np.max(TF_mag_out_res)
+    peak_list.append(peak)
+
+# Ploteamos todos los picos
+peak_list.pop(110)
+peak_list = np.asarray(peak_list)
+peak_list = np.sort(peak_list, axis=None)
+labels = ['1R', '2R', '3R', '4R', '5R', '6R', '7R', '8R', '9R', '10R']
+labels = np.repeat(labels,11) # Hay 11 frecuencias de corte
+
+for i in range(0,len(peak_list)-1):
+    plt.plot(labels[i],  peak_list[i], 'ko')
+
+plt.plot(labels,  peak_list, color='r')
+plt.xlabel('Posiciones del potenciometro de Resonancia')
+plt.ylabel('Valores de picos (dB)')
+plt.savefig("Resonancias_sweepstat" + ".png".format())
