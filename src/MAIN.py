@@ -3,13 +3,15 @@ from Resonancia import resonance
 from Frequencia import frequency
 from Transfer_Function import transfer_function
 from pathlib import Path
+import numpy as np
+import matplotlib.pyplot as plt
 
 # definimos un parametro global y una funcion de essentia
 sr = 48000
 mean = es.Mean()
 
 # Definimos un directorio y la lista de arxivos que contiene
-data_dir = Path("./AUDIOS_TFG/IRs_separadas/Pregunta_1/Ampmin/")
+data_dir = Path("./AUDIOS_TFG/IRs_separadas/Preguntas_2,3y4/")
 wav_files = list(data_dir.rglob("*.wav"))
 
 # Declaramos ciertas variables para poder reusarlas fuera de los ifs
@@ -31,19 +33,19 @@ for child in wav_files:
     if "Loopback" in child.stem:
         input_file = child
         IR_input = es.MonoLoader(filename= './AUDIOS_TFG/IRs_separadas/'
-                                           'Pregunta_1/Ampmin/' +
+                                           'Preguntas_2,3y4/' +
                                            str(input_file.name),
                                  sampleRate=sr)()
     elif "Bypass" in child.stem:
         reference_file = child
         IR_ref = es.MonoLoader(filename= './AUDIOS_TFG/IRs_separadas/'
-                                           'Pregunta_1/Ampmin/' +
+                                           'Preguntas_2,3y4/' +
                                          (reference_file.name),
                                sampleRate=sr)()
     if "_0R_" in child.stem:
         output_file_freq = child
         IR_output_freq = es.MonoLoader(filename= './AUDIOS_TFG/IRs_separadas/'
-                                           'Pregunta_1/Ampmin/' +
+                                           'Preguntas_2,3y4/' +
                                                  str(output_file_freq.name),
                                        sampleRate=sr)()
         output_file_freq_names.append(output_file_freq.stem)
@@ -51,7 +53,7 @@ for child in wav_files:
     else:
         output_file_res = child
         IR_output_res = es.MonoLoader(filename= './AUDIOS_TFG/IRs_separadas/'
-                                           'Pregunta_1/Ampmin/' +
+                                           'Preguntas_2,3y4/' +
                                                 str(output_file_res.name),
                                       sampleRate=sr)()
         output_file_res_names.append(output_file_res.stem)
@@ -64,6 +66,7 @@ TF_mag_ref, TF_ang_ref = transfer_function(IR_input, IR_ref)
 TF_mag_ref = TF_mag_ref - mean(TF_mag_ref[500:2000])
 
 # CALCULAR TF DE SALIDAS CON RES = 0 y PARAMETROS DE FRECUENCIA
+fcorte_lista=[]
 for i in range(0,len(IR_output_freq_list)-1):
     TF_mag_out_freq, TF_ang_out_freq = transfer_function(IR_input,
                                                          IR_output_freq_list[i])
@@ -75,7 +78,21 @@ for i in range(0,len(IR_output_freq_list)-1):
                                   output_file_freq_names[i],
                                   reference_file.name)
 
+    fcorte_lista.append(fcorte)
 
+fcorte_lista = np.asarray(fcorte_lista)
+fcorte_lista = np.sort(fcorte_lista, axis=None)
+labels=['16F', '32F', '64F', '128F', '256F', '512F', '1024F', '2048F', '4096F']
+
+for i in range(0,len(fcorte_lista)):
+    plt.plot(labels[i],  fcorte_lista[i], 'ko')
+
+plt.plot(labels,  fcorte_lista, color='r')
+plt.xlabel('Frecuencias de corte teoricas (Hz)')
+plt.ylabel('Frecuencias de corte reales (Hz)')
+plt.savefig("Frecuencias_de_corte" + ".png".format())
+
+'''
 # CALCULAR TF DE SALIDAS CON RES != 0 Y PARAMETROS DE RESONANCIA
 for i in range(0,len(IR_output_res_list)-1):
     TF_mag_out_res, TF_ang_out_res = transfer_function(
@@ -87,3 +104,4 @@ for i in range(0,len(IR_output_res_list)-1):
                                                       TF_mag_ref,
                                                       output_file_res_names[i],
                                                       reference_file.name)
+'''
