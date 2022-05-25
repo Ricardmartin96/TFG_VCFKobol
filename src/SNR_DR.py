@@ -22,7 +22,7 @@ snr = 20*np.log10(bypass_rms/noise_rms) + 15
 
 # Calculamos el rango dinamico
 bypass_peak = np.max(bypass)
-dr = 20*np.log10(bypass_peak/noise_rms)+15 # dynamic range
+dr = 20*np.log10(bypass_peak/noise_rms)+15
 
 # Mostramos los resultados
 print('RMS_tone (dB): ', 20*np.log10(bypass_rms))

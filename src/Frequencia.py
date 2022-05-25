@@ -23,11 +23,12 @@ def frequency(sr, TF_mag_out, TF_mag_ref, output_file_freq, reference_file):
     output_file_freq_name = str(output_file_freq).replace('IR_', '_', 1)
     reference_file_name = str(reference_file).replace('IR_', '_', 1)
 
+    # Calculamos un vector de frecuencias para el plot
     N = len(TF_mag_out)
     n = np.arange(N)
     T = N / sr
     freq = n / T
-    '''
+
     # Ploteamos y guardamos los resultados
     fig, ax = plt.subplots(figsize=(10, 4))
     plt.semilogx(freq, TF_mag_out, color='r')
@@ -63,6 +64,6 @@ def frequency(sr, TF_mag_out, TF_mag_ref, output_file_freq, reference_file):
     freq_file = open("Results"+str(output_file_freq_name)+".json".format(),"w")
     json.dump(dict1, freq_file, indent=6)
     freq_file.close()
-    '''
+
     return freq[fcorte], pendiente
 

@@ -65,7 +65,6 @@ TF_mag_ref, TF_ang_ref = transfer_function(IR_input, IR_ref)
 # Reducimos el nivel de la region plana para compensar la ganancia extra
 TF_mag_ref = TF_mag_ref - mean(TF_mag_ref[500:2000])
 
-'''
 # CALCULAR TF DE SALIDAS CON RES = 0 y PARAMETROS DE FRECUENCIA
 fcorte_lista=[]
 for i in range(0,len(IR_output_freq_list)-1):
@@ -93,35 +92,48 @@ plt.plot(labels,  fcorte_lista, color='r')
 plt.xlabel('Posiciones del potenciometro de Frecuencia')
 plt.ylabel('Frecuencias de corte (Hz)')
 plt.savefig("Frecuencias_de_corte_sweepstat" + ".png".format())
-'''
+
 
 # CALCULAR TF DE SALIDAS CON RES != 0 Y PARAMETROS DE RESONANCIA
 peak_list=[]
+peak_mean=[]
 for i in range(0,len(IR_output_res_list)-1):
     TF_mag_out_res, TF_ang_out_res = transfer_function(
         IR_input, IR_output_res_list[i])
 
     TF_mag_out_res = TF_mag_out_res - mean(TF_mag_out_res[40:90])
-    '''
+
     f1, f2, fcentral, fres, peak, Q = resonance(sr, TF_mag_out_res,
                                                       TF_mag_ref,
                                                       output_file_res_names[i],
                                                       reference_file.name)
-    '''
-    peak = np.max(TF_mag_out_res)
     peak_list.append(peak)
 
-# Ploteamos todos los picos
-peak_list.pop(110)
+# Reordenamos la lista de picos y definimos la lista de etiquetas
 peak_list = np.asarray(peak_list)
 peak_list = np.sort(peak_list, axis=None)
 labels = ['1R', '2R', '3R', '4R', '5R', '6R', '7R', '8R', '9R', '10R']
-labels = np.repeat(labels,11) # Hay 11 frecuencias de corte
 
-for i in range(0,len(peak_list)-1):
-    plt.plot(labels[i],  peak_list[i], 'ko')
+# Calculamos la media de los picos de cada resonancia
+pos_1R = mean(peak_list[0:10])
+pos_2R = mean(peak_list[11:21])
+pos_3R = mean(peak_list[22:32])
+pos_4R = mean(peak_list[33:43])
+pos_5R = mean(peak_list[44:54])
+pos_6R = mean(peak_list[55:65])
+pos_7R = mean(peak_list[66:76])
+pos_8R = mean(peak_list[77:87])
+pos_9R = mean(peak_list[88:98])
+pos_10R = mean(peak_list[99:109])
 
-plt.plot(labels,  peak_list, color='r')
+peak_mean = [pos_1R, pos_2R, pos_3R, pos_4R, pos_5R, pos_6R, pos_7R, pos_8R,
+             pos_9R, pos_10R]
+
+# PLoteamos los picos
+for i in range(0,len(peak_mean)):
+    plt.plot(labels[i],  peak_mean[i], 'ko')
+
+plt.plot(labels,  peak_mean, color='r')
 plt.xlabel('Posiciones del potenciometro de Resonancia')
 plt.ylabel('Valores de picos (dB)')
 plt.savefig("Resonancias_sweepstat" + ".png".format())

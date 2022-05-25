@@ -32,7 +32,7 @@ def transfer_function (IR_input, IR_output):
     IR_input[IR_input == 0] = np.finfo(float).eps
     IR_output[IR_output == 0] = np.finfo(float).eps
 
-    # Calculamos fft y funcion de transferencia(TF) del output
+    # Calculamos fft y funcion de transferencia (TF) del output
     spec = es.FFT(size=s)
 
     IR_input_fft = spec(IR_input)
@@ -40,10 +40,9 @@ def transfer_function (IR_input, IR_output):
 
     trans_func = IR_output_fft / IR_input_fft
     TF_mag, TF_ang = c2p(trans_func)
-    TF_mag = 20*np.log10(TF_mag)
+    TF_mag = 20*np.log10(TF_mag) # Obtenemos la magnitud de la TF
 
     # Recortamos la TF para tener la region sin ruido
-    # (esta va desde los 40Hz hasta los 40kHz)
     TF_mag = TF_mag[400:320000]
 
     return TF_mag, TF_ang
