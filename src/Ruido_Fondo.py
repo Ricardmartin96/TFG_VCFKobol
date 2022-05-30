@@ -7,11 +7,10 @@ sr = 48000
 
 # Importamos audios
 loader = es.MonoLoader(audioStream=0, downmix="mix", filename='./AUDIOS_TFG'
-                      '/Preg_5i6/tone_100.wav', sampleRate=sr)
+                      '/Preg_5i6/tone_10k.wav', sampleRate=sr)
 tone = loader()
-
 loader = es.MonoLoader(audioStream=0, downmix="mix", filename='./AUDIOS_TFG'
-                      '/Preg_5i6/Bypass_tone100.wav', sampleRate=sr)
+                      '/Preg_5i6/Bypass_tone10k.wav', sampleRate=sr)
 bypass = loader()
 
 # Nos aseguramos que ambos audios tengan la misma longitud y esta sea par
@@ -41,35 +40,7 @@ N = len(back_noise)
 n = np.arange(N)
 T = N/sr
 freq = n/T
-
-tone_mag = 20*np.log10(tone_mag)
-bypass_mag = 20*np.log10(bypass_mag)
-
-plt.subplot(3,1,1)
-plt.semilogx(freq, tone_mag)
-plt.xlabel('Freq (Hz)')
-plt.ylabel('Amplitude (dB)')
-plt.xlim(10, 22000)
+plt.semilogx(freq,back_noise)
+plt.xlim(10,32000)
 plt.ylim(-20,70)
-plt.title('Magnitud_Tone')
-
-plt.subplot(3,1,2)
-plt.semilogx(freq, bypass_mag)
-plt.xlabel('Freq (Hz)')
-plt.ylabel('Amplitude (dB)')
-plt.xlim(10, 22000)
-plt.ylim(-20,70)
-plt.title('Magnitud_Bypass')
-
-plt.subplot(3,1,3)
-plt.semilogx(freq, back_noise)
-plt.xlabel('Freq (Hz)')
-plt.ylabel('Amplitude (dB)')
-plt.xlim(10, 22000)
-plt.ylim(-20,70)
-plt.title('Magnitud_Noise')
-plt.tight_layout()
 plt.show()
-
-
-
