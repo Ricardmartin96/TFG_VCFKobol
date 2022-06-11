@@ -67,7 +67,7 @@ TF_mag_ref, TF_ang_ref = transfer_function(IR_input, IR_ref)
 
 # Reducimos el nivel de la region plana para compensar la ganancia extra
 TF_mag_ref = TF_mag_ref - mean(TF_mag_ref[500:2000])
-'''
+
 # CALCULAR TF DE SALIDAS CON RES = 0 y PARAMETROS DE FRECUENCIA
 fcorte_lista=[]
 for i in range(0,len(IR_output_freq_list)):
@@ -95,7 +95,7 @@ plt.plot(labels,  fcorte_lista, color='r')
 plt.xlabel('Voltios enviados (V)')
 plt.ylabel('Frecuencias de corte (Hz)')
 plt.savefig("Frecuencias_de_corte_CV_sweepstat" + ".png".format())
-'''
+
 # CALCULAR TF DE SALIDAS CON RES != 0 Y PARAMETROS DE RESONANCIA
 peak_list=[]
 for i in range(0,len(IR_output_res_list)):
