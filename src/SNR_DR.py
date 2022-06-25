@@ -16,11 +16,11 @@ noise = loader()
 rms = es.RMS()
 bypass_rms = rms(bypass)
 noise_rms = rms(noise)
-snr = 20*np.log10(bypass_rms/noise_rms) + 15
+snr = 20*np.log10(bypass_rms/noise_rms) + 18
 
 # Calculamos el rango dinamico
 bypass_peak = np.max(bypass)
-dr = 20*np.log10(bypass_peak/noise_rms) + 15
+dr = 20*np.log10(bypass_peak/noise_rms) + 18
 
 # Mostramos los resultados
 print('RMS_tone (dB): ', 20*np.log10(bypass_rms))
