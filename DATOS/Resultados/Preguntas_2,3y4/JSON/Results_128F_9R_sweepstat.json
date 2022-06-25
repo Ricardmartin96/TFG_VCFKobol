@@ -1,10 +1,10 @@
 {
       "Resultados: ": {
-            "F1": "915.3942428035044",
-            "F2": "915.5444305381727",
-            "Frecuencia central": "915.5444305381727",
-            "Frecuencia de resonancia": "915.3942428035044",
-            "Pico o ganancia": "71.01967",
-            "Factor Q": "6095.499979493069"
+            "F1": "795.9999789250735",
+            "F2": "796.1264284848709",
+            "Frecuencia central": "796.1264284848709",
+            "Frecuencia de resonancia": "795.9999789250735",
+            "Pico o ganancia": "40.34536",
+            "Factor Q": "6295.499980144547"
       }
 }
